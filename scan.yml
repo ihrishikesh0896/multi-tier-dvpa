@@ -1,26 +1,32 @@
 scan:
   static_reachability: true
   tools:
-    - trivy
-    - tainter
-    - python_reachability
-    - route_extractor
-    - metadata
-    - dynamic_reachability
-    - intelligent_dast  
+    - git
+    - trivy                # SCA — CVEs in installed packages
+    - tainter              # taint analysis (source→sink tracing)
+    - python_reachability  # AST call-chain analysis
+    - route_extractor      # HTTP route map
+    - metadata             # PyPI → importable name resolution
+    - dynamic_reachability # Docker-based runtime coverage
+
   runtime:
     enabled: true
-    timeout: 60
-    coverage_wait: 30
-    container_port: 3000
+    timeout: 180           # Django multi-tier needs more startup time
+    coverage_wait: 15      # wait after Schemathesis traffic before flushing
+    container_port: 3000   # Django backend port
+    ebpf:
+      enabled: true        # non-invasive eBPF tracing via bpftrace
+      mode: openat         # trace file-open syscalls (portable, no USDT needed)
+      tracer: bpftrace
+      sidecar_mode: false  # direct tracing from vulnreach container (not sidecar)
+      kernel_check: true   # log advisory if kernel < 4.9 / < 5.2
+      language: python     # Django is a Python runtime
+
   openapi_generator:
-    enabled: false
+    enabled: false         # openapi.json already present in repo
+
   intelligent_dast:
     enabled: false
-    provider: ollama
-    model: qwen3-coder:480b-cloud
-    max_iter: 5
-    ollama_base_url: http://localhost:11434
 
 risk:
   exposure: public
