@@ -4,7 +4,7 @@ scan:
     - git
     - trivy
     - tainter
-    - python_reachability
+    - multi_language_reachability
     - route_extractor
     - metadata
     - dynamic_reachability
